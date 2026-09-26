@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import type { OnModuleDestroy } from '@galaxy-stack/orbit-core';
 
 export interface EventHandlerMeta {
@@ -182,4 +183,19 @@ export class EventBus {
     this.registrations.clear();
     this.fragmentIndex.clear();
   }
+
+  /** Wiring data for devtools: event -> registered handler class/property names. */
+  wiring(): Array<{ event: string; handlers: Array<{ handler: string }> }> {
+    const result: Array<{ event: string; handlers: Array<{ handler: string }> }> = [];
+    for (const [event, list] of this.registrations) {
+      result.push({
+        event,
+        handlers: list.map((r) => ({
+          handler: `${r.instance.constructor.name}.${String(r.meta.propertyKey)}`,
+        })),
+      });
+    }
+    return result;
+  }
+
 }
